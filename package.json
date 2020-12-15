@@ -1,0 +1,29 @@
+{
+  "name": "root-updater",
+  "version": "1.0.4",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint --ext .js --ignore-path .gitignore .",
+    "start": "node src/index.js"
+  },
+  "keywords": [],
+  "author": "Roman Semenov <semenov.roma@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "circomlib": "git+https://github.com/tornadocash/circomlib.git#3b492f9801573eebcfe1b6c584afe8a3beecf2b4",
+    "cron": "^1.8.2",
+    "dotenv": "^8.2.0",
+    "eth-ens-namehash": "^2.0.8",
+    "fixed-merkle-tree": "^0.3.4",
+    "ioredis": "^4.17.3",
+    "snarkjs": "git+https://github.com/tornadocash/snarkjs.git#869181cfaf7526fe8972073d31655493a04326d5",
+    "tx-manager": "^0.2.9",
+    "web3": "^1.2.11",
+    "torn-token": "git+ssh://git@github.com/tornadocash/torn-token.git#04c4df88d470ca7503ef5d97882c56cba4f3647d"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.5.0"
+  }
+}

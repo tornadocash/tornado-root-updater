@@ -1,0 +1,22 @@
+version: '2'
+
+# ssh-agent && ssh-add -K ~/.ssh/id_rsa
+# DOCKER_BUILDKIT=1 docker build --ssh default -t tornadocash/root-updater .
+services:
+  app:
+    image: tornadocash/root-updater
+    depends_on: [redis]
+    restart: always
+    env_file: .env
+    environment:
+      REDIS_URL: redis://redis/0
+
+  redis:
+    image: redis
+    restart: always
+    command: [redis-server, --appendonly, 'yes']
+    volumes:
+      - redis:/data
+
+volumes:
+  redis:
