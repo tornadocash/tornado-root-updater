@@ -20,7 +20,7 @@
     "snarkjs": "git+https://github.com/tornadocash/snarkjs.git#869181cfaf7526fe8972073d31655493a04326d5",
     "tx-manager": "^0.2.9",
     "web3": "^1.2.11",
-    "torn-token": "git+ssh://git@github.com/tornadocash/torn-token.git#04c4df88d470ca7503ef5d97882c56cba4f3647d"
+    "torn-token": "git+ssh://git@github.com/tornadocash/torn-token.git#ed68304596f73bf746321e1cd2454979688ef1dd"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
