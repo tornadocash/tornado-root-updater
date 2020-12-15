@@ -2,7 +2,7 @@ version: '2'
 
 services:
   app:
-    image: tornadocash/root-updater
+    image: tornadocash/tornado-root-updater
     depends_on: [redis]
     restart: always
     env_file: .env
