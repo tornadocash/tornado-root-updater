@@ -1,7 +1,5 @@
 version: '2'
 
-# ssh-agent && ssh-add -K ~/.ssh/id_rsa
-# DOCKER_BUILDKIT=1 docker build --ssh default -t tornadocash/root-updater .
 services:
   app:
     image: tornadocash/root-updater
