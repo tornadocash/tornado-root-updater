@@ -1,8 +1,10 @@
 require('dotenv').config()
 const cron = require('cron')
-const { web3, redis, getTornadoTrees, txManager } = require('./singletons')
+const { web3, redis, getTornadoTrees, txManager, gasOracle } = require('./singletons')
 const config = require('torn-token')
 const { getTornadoEvents, getRegisteredEvents } = require('./events')
+const GAS_PRICE_VALUES = ['low', 'standard', 'fast', 'instant']
+const { toWei, toHex } = require('web3-utils')
 
 const STARTING_BLOCK = process.env.STARTING_BLOCK || 0
 const prefix = {
@@ -47,10 +49,19 @@ async function main(isRetry = false) {
     console.log(
       `Submitting tree update with ${chunks['deposit'].length} deposits and ${chunks['withdrawal'].length} withdrawals`,
     )
+    let gasPrice
+    if (GAS_PRICE_VALUES.includes(process.env.GAS_PRICE)) {
+      const gasPrices = await gasOracle.gasPrices()
+      gasPrice = gasPrices[process.env.GAS_PRICE]
+    } else {
+      gasPrice = Number(process.env.GAS_PRICE)
+    }
+
     const data = tornadoTrees.methods.updateRoots(chunks['deposit'], chunks['withdrawal']).encodeABI()
     const tx = txManager.createTx({
       to: tornadoTrees._address,
       data,
+      gasPrice: toHex(toWei(gasPrice.toString(), 'Gwei')),
     })
 
     try {

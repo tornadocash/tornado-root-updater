@@ -16,11 +16,12 @@
     "dotenv": "^8.2.0",
     "eth-ens-namehash": "^2.0.8",
     "fixed-merkle-tree": "^0.3.4",
+    "gas-price-oracle": "^0.2.2",
     "ioredis": "^4.17.3",
     "snarkjs": "git+https://github.com/tornadocash/snarkjs.git#869181cfaf7526fe8972073d31655493a04326d5",
+    "torn-token": "^1.0.0",
     "tx-manager": "^0.2.9",
-    "web3": "^1.2.11",
-    "torn-token": "^1.0.0"
+    "web3": "^1.2.11"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",

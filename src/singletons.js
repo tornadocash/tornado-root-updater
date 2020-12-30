@@ -5,6 +5,8 @@ const tornadoTreesAbi = require('../abi/tornadoTrees.json')
 const Redis = require('ioredis')
 const ENSResolver = require('./resolver')
 const resolver = new ENSResolver()
+const { GasPriceOracle } = require('gas-price-oracle')
+const gasOracle = new GasPriceOracle({ defaultRpc: process.env.RPC_URL })
 const redis = new Redis(process.env.REDIS_URL)
 const config = require('torn-token')
 let tornadoTrees
@@ -34,4 +36,5 @@ module.exports = {
   redis,
   getTornadoTrees,
   txManager,
+  gasOracle,
 }
