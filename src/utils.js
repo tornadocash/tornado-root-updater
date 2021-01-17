@@ -9,8 +9,10 @@ const toFixedHex = (number, length = 32) =>
 const poseidonHash = (items) => toFixedHex(poseidon(items))
 const poseidonHash2 = (a, b) => poseidonHash([a, b])
 
+const action = Object.freeze({ DEPOSIT: 'deposit', WITHDRAWAL: 'withdrawal' })
 module.exports = {
   toFixedHex,
   poseidonHash,
   poseidonHash2,
+  action,
 }

@@ -1,10 +1,10 @@
 require('dotenv').config()
 const cron = require('cron')
-const { web3, redis, getTornadoTrees, txManager, gasOracle } = require('./singletons')
+const { web3, redis, getTornadoTrees, txManager } = require('./singletons')
 const config = require('torn-token')
 const { getTornadoEvents, getRegisteredEvents } = require('./events')
-const GAS_PRICE_VALUES = ['low', 'standard', 'fast', 'instant']
 const { toWei, toHex } = require('web3-utils')
+const { action } = require('./utils')
 
 const STARTING_BLOCK = process.env.STARTING_BLOCK || 0
 const prefix = {
@@ -12,6 +12,8 @@ const prefix = {
   42: 'kovan.',
   5: 'goerli.',
 }
+
+let previousUpload = action.DEPOSIT
 
 async function main(isRetry = false) {
   const tornadoTrees = await getTornadoTrees()
@@ -22,7 +24,7 @@ async function main(isRetry = false) {
   const explorer = `https://${prefix[netId]}etherscan.io`
   const instances = Object.values(config.instances[`netId${netId}`].eth.instanceAddress)
   console.log(`Getting events for blocks ${startBlock} to ${currentBlock}`)
-  for (const type of ['deposit', 'withdrawal']) {
+  for (const type of Object.values(action)) {
     const newRegisteredEvents = await getRegisteredEvents({ type })
     const tornadoEvents = await getTornadoEvents({ instances, startBlock, endBlock: currentBlock, type })
 
@@ -41,27 +43,26 @@ async function main(isRetry = false) {
     }
   }
 
-  while (newEvents['deposit'].length || newEvents['withdrawal'].length) {
-    const chunks = {}
-    for (const type of ['deposit', 'withdrawal']) {
-      chunks[type] = newEvents[type].splice(0, process.env.INSERT_BATCH_SIZE)
-    }
-    console.log(
-      `Submitting tree update with ${chunks['deposit'].length} deposits and ${chunks['withdrawal'].length} withdrawals`,
-    )
-    let gasPrice
-    if (GAS_PRICE_VALUES.includes(process.env.GAS_PRICE)) {
-      const gasPrices = await gasOracle.gasPrices()
-      gasPrice = gasPrices[process.env.GAS_PRICE]
-    } else {
-      gasPrice = Number(process.env.GAS_PRICE)
-    }
+  console.log(
+    `There are ${newEvents[action.DEPOSIT].length} unprocessed deposits and ${
+      newEvents[action.WITHDRAWAL].length
+    } withdrawals`,
+  )
 
-    const data = tornadoTrees.methods.updateRoots(chunks['deposit'], chunks['withdrawal']).encodeABI()
+  while (newEvents[action.DEPOSIT].length || newEvents[action.WITHDRAWAL].length) {
+    const chunks = {}
+    const type = previousUpload === action.DEPOSIT ? action.WITHDRAWAL : action.DEPOSIT
+    chunks[type] = newEvents[type].splice(0, process.env.INSERT_BATCH_SIZE)
+
+    console.log(`Submitting tree update with ${chunks[type].length} ${type}s`)
+
+    const args =
+      previousUpload === action.DEPOSIT ? [[], chunks[action.WITHDRAWAL]] : [chunks[action.DEPOSIT], []]
+    const data = tornadoTrees.methods.updateRoots(...args).encodeABI()
     const tx = txManager.createTx({
       to: tornadoTrees._address,
       data,
-      gasPrice: toHex(toWei(gasPrice.toString(), 'Gwei')),
+      gasPrice: toHex(toWei(process.env.GAS_PRICE, 'Gwei')),
     })
 
     try {
@@ -81,6 +82,7 @@ async function main(isRetry = false) {
       }
       return
     }
+    previousUpload = type
   }
 
   await redis.set('lastBlock', currentBlock)
