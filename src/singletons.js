@@ -16,6 +16,7 @@ web3.eth.defaultAccount = web3.eth.accounts.privateKeyToAccount('0x' + process.e
 const txManager = new TxManager({
   privateKey: process.env.PRIVATE_KEY,
   rpcUrl: process.env.RPC_URL,
+  broadcastNodes: process.env.BROADCAST_NODES.split(','),
   config: {
     CONFIRMATIONS: process.env.CONFIRMATION_BLOCKS,
     MAX_GAS_PRICE: process.env.GAS_PRICE,
