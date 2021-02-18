@@ -1,62 +1,82 @@
-const { web3, getTornadoTrees } = require('./singletons')
-const tornadoAbi = require('../abi/tornado.json')
-const { poseidonHash } = require('./utils')
-const { soliditySha3 } = require('web3-utils')
+const { getTornadoTrees, redis, getProvider } = require('./singletons')
+const { action } = require('./utils')
+const ethers = require('ethers')
+const abi = new ethers.utils.AbiCoder()
 
-async function getTornadoEvents({ instances, startBlock, endBlock, type }) {
-  const hashName = type === 'deposit' ? 'commitment' : 'nullifierHash'
-  const promises = instances.map((instance) => getInstanceEvents({ type, instance, startBlock, endBlock }))
+async function getTornadoTreesEvents(type, fromBlock, toBlock) {
+  const eventName = type === action.DEPOSIT ? 'DepositData' : 'WithdrawalData'
+  const events = await getProvider().getLogs({
+    address: getTornadoTrees().address,
+    topics: getTornadoTrees().filters[eventName]().topics,
+    fromBlock,
+    toBlock,
+  })
+  return events
+    .map((e) => {
+      const { instance, hash, block, index } = getTornadoTrees().interface.parseLog(e).args
+      const encodedData = abi.encode(
+        ['address', 'bytes32', 'uint256'],
+        [instance, hash, block],
+      )
+      return {
+        instance,
+        hash,
+        block: block.toNumber(),
+        index: index.toNumber(),
+        sha3: ethers.utils.keccak256(encodedData)
+      }
+    })
+    .sort((a, b) => a.index - b.index)
+}
 
-  const raw = await Promise.all(promises)
-
-  const events = raw.flat().reduce((acc, e) => {
-    const encodedData = web3.eth.abi.encodeParameters(
-      ['address', 'bytes32', 'uint256'],
-      [e.address, e.returnValues[hashName], e.blockNumber],
-    )
-    const leafHash = soliditySha3({ t: 'bytes', v: encodedData })
-    acc[leafHash] = {
-      instance: e.address,
-      hash: e.returnValues[hashName],
-      block: e.blockNumber,
+async function getEventsWithCache(type) {
+  const currentBlock = await getProvider().getBlockNumber()
+  const lastBlock = Number(await redis.get(`${type}LastBlock`) || 0) + 1
+  // if (currentBlock <= lastBlock) {
+  //   throw new Error('Current block is lower than last block')
+  // }
+  let cachedEvents = (await redis.lrange(type, 0, -1)).map((e) => JSON.parse(e))
+  if (cachedEvents.length === 0) {
+    cachedEvents = require(`../cache/${type}.json`)
+    if (cachedEvents.length > 0) {
+      await redis.rpush(type, cachedEvents.map((e) => JSON.stringify(e)))
     }
-    return acc
-  }, {})
-  return events
+  }
+  const newEvents = await getTornadoTreesEvents(type, lastBlock, currentBlock)
+  if (newEvents.length > 0) {
+    await redis.rpush(type, newEvents.map((e) => JSON.stringify(e)))
+  }
+  await redis.set(`${type}LastBlock`, currentBlock)
+  return cachedEvents.concat(newEvents)
 }
 
-async function getInstanceEvents({ type, instance, startBlock, endBlock }) {
-  const eventName = type === 'deposit' ? 'Deposit' : 'Withdrawal'
+async function getEvents(type) {
+  const pendingMethod = type === action.DEPOSIT ? 'getRegisteredDeposits' : 'getRegisteredWithdrawals'
+  const pendingEventHashes = await getTornadoTrees()[pendingMethod]()
 
-  const contract = new web3.eth.Contract(tornadoAbi, instance)
-  const events = await contract.getPastEvents(eventName, {
-    fromBlock: startBlock,
-    toBlock: endBlock,
-  })
-  return events
-}
+  const committedMethod = type === action.DEPOSIT ? 'lastProcessedDepositLeaf' : 'lastProcessedWithdrawalLeaf'
+  const committedCount = await getTornadoTrees()[committedMethod]()
 
-async function getMiningEvents(startBlock, endBlock, type) {
-  const eventName = type === 'deposit' ? 'DepositData' : 'WithdrawalData'
-  const tornadoTrees = await getTornadoTrees()
-  const events = await tornadoTrees.getPastEvents(eventName, {
-    fromBlock: startBlock,
-    toBlock: endBlock,
-  })
-  return events
-    .sort((a, b) => a.returnValues.index - b.returnValues.index)
-    .map((e) => poseidonHash([e.returnValues.instance, e.returnValues.hash, e.returnValues.block]))
-}
+  const events = await getEventsWithCache(type)
 
-async function getRegisteredEvents({ type }) {
-  const method = type === 'deposit' ? 'getRegisteredDeposits' : 'getRegisteredWithdrawals'
-  const tornadoTrees = await getTornadoTrees()
-  const events = await tornadoTrees.methods[method]().call()
-  return events
+  const committedEvents = events.slice(0, committedCount)
+  const pendingEvents = pendingEventHashes.map((e) => events.find(a => a.sha3 === e))
+
+  if (pendingEvents.some((e) => e === undefined)) {
+    pendingEvents.forEach((e, i) => {
+      if (e === undefined) {
+        console.log('Unknown event', pendingEventHashes[i])
+      }
+    })
+    throw new Error('Tree contract expects unknown tornado event')
+  }
+
+  return {
+    committedEvents,
+    pendingEvents,
+  }
 }
 
 module.exports = {
-  getTornadoEvents,
-  getMiningEvents,
-  getRegisteredEvents,
+  getEvents,
 }

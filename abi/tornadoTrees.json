@@ -2,24 +2,51 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "address",
+        "name": "_governance",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
         "name": "_tornadoProxy",
-        "type": "bytes32"
+        "type": "address"
       },
       {
-        "internalType": "bytes32",
-        "name": "_hasher2",
-        "type": "bytes32"
+        "internalType": "contract ITornadoTreesV1",
+        "name": "_tornadoTreesV1",
+        "type": "address"
       },
       {
-        "internalType": "bytes32",
-        "name": "_hasher3",
-        "type": "bytes32"
+        "internalType": "contract IBatchTreeUpdateVerifier",
+        "name": "_treeUpdateVerifier",
+        "type": "address"
       },
       {
-        "internalType": "uint32",
-        "name": "_levels",
-        "type": "uint32"
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "depositsFrom",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "depositsStep",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "withdrawalsFrom",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "withdrawalsStep",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct TornadoTrees.SearchParams",
+        "name": "_searchParams",
+        "type": "tuple"
       }
     ],
     "stateMutability": "nonpayable",
@@ -88,19 +115,13 @@
     "type": "event"
   },
   {
-    "inputs": [
-      {
-        "internalType": "bytes32[]",
-        "name": "domains",
-        "type": "bytes32[]"
-      }
-    ],
-    "name": "bulkResolve",
+    "inputs": [],
+    "name": "BYTES_SIZE",
     "outputs": [
       {
-        "internalType": "address[]",
-        "name": "result",
-        "type": "address[]"
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -108,12 +129,90 @@
   },
   {
     "inputs": [],
-    "name": "depositTree",
+    "name": "CHUNK_SIZE",
     "outputs": [
       {
-        "internalType": "contract OwnableMerkleTree",
+        "internalType": "uint256",
         "name": "",
-        "type": "address"
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "CHUNK_TREE_HEIGHT",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "ITEM_SIZE",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "SNARK_FIELD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "blockNumber",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "depositRoot",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "depositV1Length",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -140,10 +239,112 @@
   },
   {
     "inputs": [],
-    "name": "hasher",
+    "name": "depositsLength",
     "outputs": [
       {
-        "internalType": "contract IHasher",
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract ITornadoTreesV1",
+        "name": "_tornadoTreesV1",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "_type",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "elementExists",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "success",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract ITornadoTreesV1",
+        "name": "_tornadoTreesV1",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "_type",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_from",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_step",
+        "type": "uint256"
+      }
+    ],
+    "name": "findArrayLength",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getRegisteredDeposits",
+    "outputs": [
+      {
+        "internalType": "bytes32[]",
+        "name": "_deposits",
+        "type": "bytes32[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getRegisteredWithdrawals",
+    "outputs": [
+      {
+        "internalType": "bytes32[]",
+        "name": "_withdrawals",
+        "type": "bytes32[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "governance",
+    "outputs": [
+      {
+        "internalType": "address",
         "name": "",
         "type": "address"
       }
@@ -178,59 +379,21 @@
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "previousDepositRoot",
+    "outputs": [
       {
         "internalType": "bytes32",
-        "name": "node",
+        "name": "",
         "type": "bytes32"
       }
     ],
-    "name": "resolve",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
-    "name": "tornadoProxy",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "withdrawalTree",
-    "outputs": [
-      {
-        "internalType": "contract OwnableMerkleTree",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "withdrawals",
+    "name": "previousWithdrawalRoot",
     "outputs": [
       {
         "internalType": "bytes32",
@@ -254,7 +417,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "registerNewDeposit",
+    "name": "registerDeposit",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -268,11 +431,11 @@
       },
       {
         "internalType": "bytes32",
-        "name": "_nullifier",
+        "name": "_nullifierHash",
         "type": "bytes32"
       }
     ],
-    "name": "registerNewWithdrawal",
+    "name": "registerWithdrawal",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -280,78 +443,116 @@
   {
     "inputs": [
       {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "instance",
-            "type": "address"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "hash",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "uint256",
-            "name": "block",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct TornadoTrees.TreeLeaf[]",
-        "name": "_deposits",
-        "type": "tuple[]"
+        "internalType": "address",
+        "name": "_tornadoProxy",
+        "type": "address"
+      }
+    ],
+    "name": "setTornadoProxyContract",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract IBatchTreeUpdateVerifier",
+        "name": "_treeUpdateVerifier",
+        "type": "address"
+      }
+    ],
+    "name": "setVerifierContract",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "tornadoProxy",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "tornadoTreesV1",
+    "outputs": [
+      {
+        "internalType": "contract ITornadoTreesV1",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "treeUpdateVerifier",
+    "outputs": [
+      {
+        "internalType": "contract IBatchTreeUpdateVerifier",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "_proof",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_argsHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_currentRoot",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_newRoot",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "_pathIndices",
+        "type": "uint32"
       },
       {
         "components": [
           {
-            "internalType": "address",
-            "name": "instance",
-            "type": "address"
-          },
-          {
             "internalType": "bytes32",
             "name": "hash",
             "type": "bytes32"
           },
-          {
-            "internalType": "uint256",
-            "name": "block",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct TornadoTrees.TreeLeaf[]",
-        "name": "_withdrawals",
-        "type": "tuple[]"
-      }
-    ],
-    "name": "updateRoots",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "components": [
           {
             "internalType": "address",
             "name": "instance",
             "type": "address"
           },
           {
-            "internalType": "bytes32",
-            "name": "hash",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "uint256",
+            "internalType": "uint32",
             "name": "block",
-            "type": "uint256"
+            "type": "uint32"
           }
         ],
-        "internalType": "struct TornadoTrees.TreeLeaf[]",
-        "name": "_deposits",
-        "type": "tuple[]"
+        "internalType": "struct TornadoTrees.TreeLeaf[4]",
+        "name": "_events",
+        "type": "tuple[4]"
       }
     ],
     "name": "updateDepositTree",
@@ -362,26 +563,51 @@
   {
     "inputs": [
       {
+        "internalType": "bytes",
+        "name": "_proof",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_argsHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_currentRoot",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_newRoot",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_pathIndices",
+        "type": "uint256"
+      },
+      {
         "components": [
-          {
-            "internalType": "address",
-            "name": "instance",
-            "type": "address"
-          },
           {
             "internalType": "bytes32",
             "name": "hash",
             "type": "bytes32"
           },
           {
-            "internalType": "uint256",
+            "internalType": "address",
+            "name": "instance",
+            "type": "address"
+          },
+          {
+            "internalType": "uint32",
             "name": "block",
-            "type": "uint256"
+            "type": "uint32"
           }
         ],
-        "internalType": "struct TornadoTrees.TreeLeaf[]",
-        "name": "_withdrawals",
-        "type": "tuple[]"
+        "internalType": "struct TornadoTrees.TreeLeaf[4]",
+        "name": "_events",
+        "type": "tuple[4]"
       }
     ],
     "name": "updateWithdrawalTree",
@@ -409,19 +635,6 @@
   },
   {
     "inputs": [],
-    "name": "depositRoot",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "withdrawalRoot",
     "outputs": [
       {
@@ -434,13 +647,19 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "getRegisteredDeposits",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawals",
     "outputs": [
       {
-        "internalType": "bytes32[]",
-        "name": "_deposits",
-        "type": "bytes32[]"
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
       }
     ],
     "stateMutability": "view",
@@ -448,12 +667,12 @@
   },
   {
     "inputs": [],
-    "name": "getRegisteredWithdrawals",
+    "name": "withdrawalsLength",
     "outputs": [
       {
-        "internalType": "bytes32[]",
-        "name": "_withdrawals",
-        "type": "bytes32[]"
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -461,7 +680,7 @@
   },
   {
     "inputs": [],
-    "name": "blockNumber",
+    "name": "withdrawalsV1Length",
     "outputs": [
       {
         "internalType": "uint256",
