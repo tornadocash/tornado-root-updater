@@ -2,8 +2,7 @@ require('dotenv').config()
 const ethers = require('ethers')
 const { TxManager } = require('tx-manager')
 const tornadoTreesAbi = require('../abi/tornadoTrees.json')
-const Redis = require('ioredis')
-const redis = new Redis(process.env.REDIS_URL)
+
 const config = require('torn-token')
 let tornadoTrees
 let provider
@@ -27,13 +26,16 @@ function getProvider() {
 
 function getTornadoTrees() {
   if (!tornadoTrees) {
-    tornadoTrees = new ethers.Contract(process.env.TORNADO_TREES || config.tornadoTrees.address, tornadoTreesAbi, getProvider())
+    tornadoTrees = new ethers.Contract(
+      process.env.TORNADO_TREES || config.tornadoTrees.address,
+      tornadoTreesAbi,
+      getProvider(),
+    )
   }
   return tornadoTrees
 }
 
 module.exports = {
-  redis,
   getTornadoTrees,
   getProvider,
   txManager,

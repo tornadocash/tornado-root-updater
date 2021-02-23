@@ -23,9 +23,11 @@ async function updateTree(committedEvents, pendingEvents, type) {
     const { input, args } = tornadoTrees.batchTreeUpdate(tree, chunk)
     const proof = await tornadoTrees.prove(input, './snarks/BatchTreeUpdate')
 
-    console.log('Sending update tx')
+    console.log(`Preparing update ${type} tx...`)
     const method = type === action.DEPOSIT ? 'updateDepositTree' : 'updateWithdrawalTree'
-    const txData = await getTornadoTrees().populateTransaction[method](proof, ...args, { gasPrice: parseUnits(GAS_PRICE, 'gwei') })
+    const txData = await getTornadoTrees().populateTransaction[method](proof, ...args, {
+      gasPrice: parseUnits(GAS_PRICE, 'gwei'),
+    })
     const tx = txManager.createTx(txData)
 
     const receiptPromise = tx

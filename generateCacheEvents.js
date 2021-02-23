@@ -19,6 +19,8 @@ const instances = [
   '0xA160cdAB225685dA1d56aa342Ad8841c3b53f291',
 ]
 
+const tornadoTreesDeploymentBlock = 11474714
+
 async function getTornadoEvents({ instances, fromBlock, toBlock, type, provider }) {
   const hashName = type === 'deposit' ? 'commitment' : 'nullifierHash'
   const promises = instances.map((instance) =>
@@ -63,8 +65,8 @@ async function getInstanceEvents({ type, instance, fromBlock, toBlock, provider 
   return events
 }
 
-async function getDepositsCache() {
-  let fromBlock = 11474714
+async function getPendingDeposits() {
+  let fromBlock = tornadoTreesDeploymentBlock
   let toBlock = fromBlock + 200000
   let tornadoEvents = {}
   const latestBlock = await provider.getBlockNumber()
@@ -99,11 +101,11 @@ async function getDepositsCache() {
     }
     return { ...leaf, index: lastProcessedDepositLeaf++, sha3: hash }
   })
-  fs.writeFileSync('./cache/deposit.json', JSON.stringify(cachedEvents, null, 2))
+  fs.writeFileSync('./cache/pendingDeposits.json', JSON.stringify(cachedEvents, null, 2))
 }
 
-async function getWithdrawalsCache() {
-  let fromBlock = 11474714
+async function getPendingWithdrawals() {
+  let fromBlock = tornadoTreesDeploymentBlock
   let toBlock = fromBlock + 200000
   let tornadoEvents = {}
   const latestBlock = await provider.getBlockNumber()
@@ -143,8 +145,46 @@ async function getWithdrawalsCache() {
     }
     return { ...leaf, index: lastProcessedWithdrawalLeaf++, sha3: hash }
   })
-  fs.writeFileSync('./cache/withdrawal.json', JSON.stringify(cachedEvents, null, 2))
+  fs.writeFileSync('./cache/pendingWithdrawals.json', JSON.stringify(cachedEvents, null, 2))
 }
 
-// getDepositsCache()
-// getWithdrawalsCache()
+async function getTornadoTreesEvents(type, fromBlock, toBlock) {
+  const eventName = type === 'deposit' ? 'DepositData' : 'WithdrawalData'
+  const events = await provider.getLogs({
+    address: tornadoTreesV1.address,
+    topics: tornadoTreesV1.filters[eventName]().topics,
+    fromBlock,
+    toBlock,
+  })
+  return events
+    .map((e) => {
+      const { instance, hash, block, index } = tornadoTreesV1.interface.parseLog(e).args
+      const encodedData = abi.encode(['address', 'bytes32', 'uint256'], [instance, hash, block])
+      return {
+        instance,
+        hash,
+        block: block.toNumber(),
+        index: index.toNumber(),
+        sha3: ethers.utils.keccak256(encodedData),
+      }
+    })
+    .sort((a, b) => a.index - b.index)
+}
+
+async function getCommittedDeposits() {
+  const latestBlock = await provider.getBlockNumber()
+  const events = await getTornadoTreesEvents('deposit', tornadoTreesDeploymentBlock, latestBlock)
+  fs.writeFileSync('./cache/committedDeposits.json', JSON.stringify(events, null, 2))
+}
+
+async function getCommittedWithdrawals() {
+  const latestBlock = await provider.getBlockNumber()
+  const events = await getTornadoTreesEvents('withdrawal', tornadoTreesDeploymentBlock, latestBlock)
+  fs.writeFileSync('./cache/committedWithdrawals.json', JSON.stringify(events, null, 2))
+}
+
+//getCommittedDeposits()
+//getCommittedWithdrawals()
+
+// getPendingDeposits()
+// getPendingWithdrawals()

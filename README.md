@@ -18,9 +18,6 @@ docker-compose up -d
 ## Usage for development
 
 ```shell script
-brew install redis
-redis-server
-
 yarn
 cp .env.example .env
 yarn start

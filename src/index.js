@@ -1,16 +1,14 @@
 require('dotenv').config()
 const cron = require('cron')
-const { getEvents } = require('./events')
+const { getMigrationEvents } = require('./events')
 const { updateTree } = require('./update')
-const { action } = require('./utils')
+const { MIGRATION_TYPE } = process.env
 
 async function main() {
-  // todo retry
-  for (const type of Object.values(action)) {
-    const { committedEvents, pendingEvents } = await getEvents(type)
-    console.log(`There are ${pendingEvents.length} unprocessed ${type}s`)
-    await updateTree(committedEvents, pendingEvents, type)
-  }
+  const type = MIGRATION_TYPE
+  const { committedEvents, pendingEvents } = await getMigrationEvents(type)
+  console.log(`There are ${pendingEvents.length} unprocessed ${type}s`)
+  await updateTree(committedEvents, pendingEvents, type)
   console.log('Done')
 }
 
