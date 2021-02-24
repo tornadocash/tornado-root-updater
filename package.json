@@ -18,7 +18,7 @@
     "fixed-merkle-tree": "^0.3.4",
     "snarkjs": "^0.3.59",
     "torn-token": "^1.0.0",
-    "tornado-trees": "^0.0.4",
+    "tornado-trees": "^0.0.5",
     "tx-manager": "^0.2.9"
   },
   "devDependencies": {

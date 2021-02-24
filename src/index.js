@@ -1,5 +1,4 @@
 require('dotenv').config()
-const cron = require('cron')
 const { getMigrationEvents } = require('./events')
 const { updateTree } = require('./update')
 const { MIGRATION_TYPE } = process.env
@@ -12,4 +11,4 @@ async function main() {
   console.log('Done')
 }
 
-cron.job(process.env.CRON_EXPRESSION, main, null, true, null, null, true)
+main()

@@ -4771,10 +4771,10 @@ torn-token@^1.0.0:
     ethereumjs-util "^7.0.3"
     web3 "^1.2.11"
 
-tornado-trees@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/tornado-trees/-/tornado-trees-0.0.4.tgz#568838277b01f23c9a4c01318231dea0a4af83f3"
-  integrity sha512-SL/tJ2TlY9tBpQJumg4ebKCtp5AyRxL+z+5SLhklf50E1n2GIUpETzCVqbqqSPplE6sVgpyAbFnnK1/MfGgNIQ==
+tornado-trees@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/tornado-trees/-/tornado-trees-0.0.5.tgz#2ba3813b94cce3de633c6e2c70f7e0ef082a534c"
+  integrity sha512-/kAUUy9VS4sMw8B1dsVcAw657u3jRp0x5buRBb8FfHK0BODwmyaxhopUbFoOF43EIDUf0y8UWSdHkWEkhosijg==
   dependencies:
     circom "^0.5.38"
     circom_runtime "^0.1.12"

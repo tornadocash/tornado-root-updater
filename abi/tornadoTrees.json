@@ -206,19 +206,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "depositV1Length",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -240,6 +227,19 @@
   {
     "inputs": [],
     "name": "depositsLength",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "depositsV1Length",
     "outputs": [
       {
         "internalType": "uint256",
@@ -550,9 +550,9 @@
             "type": "uint32"
           }
         ],
-        "internalType": "struct TornadoTrees.TreeLeaf[4]",
+        "internalType": "struct TornadoTrees.TreeLeaf[128]",
         "name": "_events",
-        "type": "tuple[4]"
+        "type": "tuple[128]"
       }
     ],
     "name": "updateDepositTree",
@@ -605,9 +605,9 @@
             "type": "uint32"
           }
         ],
-        "internalType": "struct TornadoTrees.TreeLeaf[4]",
+        "internalType": "struct TornadoTrees.TreeLeaf[128]",
         "name": "_events",
-        "type": "tuple[4]"
+        "type": "tuple[128]"
       }
     ],
     "name": "updateWithdrawalTree",
