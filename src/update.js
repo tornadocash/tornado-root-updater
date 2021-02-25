@@ -1,7 +1,9 @@
 require('dotenv').config()
 const { getTornadoTrees, txManager, getProvider } = require('./singletons')
 const { action, getExplorer, poseidonHash, poseidonHash2, toFixedHex } = require('./utils')
-const { parseUnits } = require('ethers').utils
+const ethers = require('ethers')
+const BigNumber = ethers.BigNumber
+const { parseUnits } = ethers.utils
 const tornadoTrees = require('tornado-trees')
 const MerkleTree = require('fixed-merkle-tree')
 
@@ -13,7 +15,7 @@ async function updateTree(committedEvents, pendingEvents, type) {
   const tree = new MerkleTree(20, leaves, { hashFunction: poseidonHash2 })
   const rootMethod = type === action.DEPOSIT ? 'depositRoot' : 'withdrawalRoot'
   const root = toFixedHex(await getTornadoTrees()[rootMethod]())
-  if (root !== tree.root()) {
+  if (!BigNumber.from(root).eq(tree.root())) {
     throw new Error(`Invalid ${type} root! Contract: ${root}, local: ${tree.root()}`)
   }
   while (pendingEvents.length >= INSERT_BATCH_SIZE) {

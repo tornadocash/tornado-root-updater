@@ -9,7 +9,7 @@ const toFixedHex = (number, length = 32) =>
       : BigNumber.from(number).toHexString().slice(2)
   ).padStart(length * 2, '0')
 
-const poseidonHash = (items) => toFixedHex(poseidon(items))
+const poseidonHash = (items) => BigNumber.from(poseidon(items))
 const poseidonHash2 = (a, b) => poseidonHash([a, b])
 
 const action = Object.freeze({ DEPOSIT: 'deposit', WITHDRAWAL: 'withdrawal' })
