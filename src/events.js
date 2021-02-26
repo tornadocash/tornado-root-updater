@@ -38,10 +38,12 @@ async function getMigrationEvents(type) {
 
   const newTreeEvents = await getTornadoTreesEvents(type, 0, 'latest')
 
-  const allEvents = committedEvents.concat(pendingEvents).concat(newTreeEvents)
+  let allEvents = committedEvents.concat(pendingEvents)
+  const filter = new Set(allEvents.map(a => a.sha3))
+  allEvents = allEvents.concat(newTreeEvents.filter(a => !filter.has(a.sha3)))
   return {
-    committedEvents: allEvents.slice(0, committedCount),
-    pendingEvents: allEvents.slice(committedCount),
+    committedEvents: allEvents.slice(0, committedCount.toNumber()),
+    pendingEvents: allEvents.slice(committedCount.toNumber()),
   }
 }
 
