@@ -31,7 +31,7 @@ async function getTornadoTreesEvents(type, fromBlock, toBlock) {
 
 async function getEventsWithCache(type) {
   const currentBlock = await getProvider().getBlockNumber()
-  const lastBlock = Number(await redis.get(`${type}LastBlock`) || 0) + 1
+  let lastBlock = Number(await redis.get(`${type}LastBlock`) || 0) + 1
   // if (currentBlock <= lastBlock) {
   //   throw new Error('Current block is lower than last block')
   // }
@@ -39,6 +39,7 @@ async function getEventsWithCache(type) {
   if (cachedEvents.length === 0) {
     cachedEvents = require(`../cache/${type}.json`)
     if (cachedEvents.length > 0) {
+      lastBlock = cachedEvents.slice(-1)[0].block + 1
       await redis.rpush(type, cachedEvents.map((e) => JSON.stringify(e)))
     }
   }
