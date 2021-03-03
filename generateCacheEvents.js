@@ -91,7 +91,7 @@ async function getPendingDeposits() {
   fs.writeFileSync('./cache/allEvents.json', JSON.stringify(tornadoEvents, null, 2))
 
   // const tornadoEvents = require('./cache/allEvents.json')
-  const registeredDeposits = await tornadoTreesV1.getRegisteredDeposits()
+  const registeredDeposits = await tornadoTreesV1.getRegisteredDeposits({ gasLimit: 500e6 })
   let lastProcessedDepositLeaf = (await tornadoTreesV1.lastProcessedDepositLeaf()).toNumber()
   const cachedEvents = registeredDeposits.map((hash) => {
     const leaf = tornadoEvents[hash]
@@ -135,7 +135,7 @@ async function getPendingWithdrawals() {
 
   fs.writeFileSync('./cache/allEvents.json', JSON.stringify(tornadoEvents, null, 2))
   // const tornadoEvents = require('./cache/allEvents.json')
-  const registeredWithdrawals = await tornadoTreesV1.getRegisteredWithdrawals()
+  const registeredWithdrawals = await tornadoTreesV1.getRegisteredWithdrawals({ gasLimit: 500e6 })
   let lastProcessedWithdrawalLeaf = (await tornadoTreesV1.lastProcessedWithdrawalLeaf()).toNumber()
   const cachedEvents = registeredWithdrawals.map((hash) => {
     const leaf = tornadoEvents[hash]
