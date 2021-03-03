@@ -52,7 +52,7 @@ async function getEventsWithCache(type) {
 
 async function getEvents(type) {
   const pendingMethod = type === action.DEPOSIT ? 'getRegisteredDeposits' : 'getRegisteredWithdrawals'
-  const pendingEventHashes = await getTornadoTrees()[pendingMethod]()
+  const pendingEventHashes = await getTornadoTrees()[pendingMethod]({ gasLimit: 500e6 })
 
   const committedMethod = type === action.DEPOSIT ? 'lastProcessedDepositLeaf' : 'lastProcessedWithdrawalLeaf'
   const committedCount = await getTornadoTrees()[committedMethod]()

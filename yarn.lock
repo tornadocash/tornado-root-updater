@@ -1224,13 +1224,6 @@ blake2b-wasm@^1.1.0:
   dependencies:
     nanoassert "^1.0.0"
 
-"blake2b-wasm@git+https://github.com/jbaylina/blake2b-wasm.git":
-  version "2.1.0"
-  uid "0d5f024b212429c7f50a7f533aa3a2406b5b42b3"
-  resolved "git+https://github.com/jbaylina/blake2b-wasm.git#0d5f024b212429c7f50a7f533aa3a2406b5b42b3"
-  dependencies:
-    nanoassert "^1.0.0"
-
 "blake2b-wasm@https://github.com/jbaylina/blake2b-wasm.git":
   version "2.1.0"
   resolved "https://github.com/jbaylina/blake2b-wasm.git#0d5f024b212429c7f50a7f533aa3a2406b5b42b3"
@@ -2262,7 +2255,7 @@ etag@~1.8.1:
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
   integrity sha1-Qa4u62XvpiJorr/qg6x9eSmbCIc=
 
-eth-ens-namehash@2.0.8, eth-ens-namehash@^2.0.8:
+eth-ens-namehash@2.0.8:
   version "2.0.8"
   resolved "https://registry.yarnpkg.com/eth-ens-namehash/-/eth-ens-namehash-2.0.8.tgz#229ac46eca86d52e0c991e7cb2aef83ff0f68bcf"
   integrity sha1-IprEbsqG1S4MmR58sq74P/D2i88=
@@ -4835,10 +4828,10 @@ torn-token@^1.0.0:
     ethereumjs-util "^7.0.3"
     web3 "^1.2.11"
 
-tornado-trees@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/tornado-trees/-/tornado-trees-0.0.4.tgz#568838277b01f23c9a4c01318231dea0a4af83f3"
-  integrity sha512-SL/tJ2TlY9tBpQJumg4ebKCtp5AyRxL+z+5SLhklf50E1n2GIUpETzCVqbqqSPplE6sVgpyAbFnnK1/MfGgNIQ==
+tornado-trees@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/tornado-trees/-/tornado-trees-0.0.5.tgz#2ba3813b94cce3de633c6e2c70f7e0ef082a534c"
+  integrity sha512-/kAUUy9VS4sMw8B1dsVcAw657u3jRp0x5buRBb8FfHK0BODwmyaxhopUbFoOF43EIDUf0y8UWSdHkWEkhosijg==
   dependencies:
     circom "^0.5.38"
     circom_runtime "^0.1.12"
