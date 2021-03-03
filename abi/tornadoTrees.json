@@ -550,9 +550,9 @@
             "type": "uint32"
           }
         ],
-        "internalType": "struct TornadoTrees.TreeLeaf[128]",
+        "internalType": "struct TornadoTrees.TreeLeaf[256]",
         "name": "_events",
-        "type": "tuple[128]"
+        "type": "tuple[256]"
       }
     ],
     "name": "updateDepositTree",
@@ -605,9 +605,9 @@
             "type": "uint32"
           }
         ],
-        "internalType": "struct TornadoTrees.TreeLeaf[128]",
+        "internalType": "struct TornadoTrees.TreeLeaf[256]",
         "name": "_events",
-        "type": "tuple[128]"
+        "type": "tuple[256]"
       }
     ],
     "name": "updateWithdrawalTree",
