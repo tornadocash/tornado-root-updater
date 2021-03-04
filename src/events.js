@@ -23,7 +23,7 @@ async function getTornadoTreesEvents(type, fromBlock, toBlock) {
         hash,
         block: block.toNumber(),
         index: index.toNumber(),
-        sha3: ethers.utils.keccak256(encodedData)
+        sha3: ethers.utils.keccak256(encodedData),
       }
     })
     .sort((a, b) => a.index - b.index)
