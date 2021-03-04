@@ -5,8 +5,8 @@ const { poseidon } = require('circomlib')
 const toFixedHex = (number, length = 32) =>
   '0x' +
   (number instanceof Buffer
-      ? number.toString('hex')
-      : BigNumber.from(number).toHexString().slice(2)
+    ? number.toString('hex')
+    : BigNumber.from(number).toHexString().slice(2)
   ).padStart(length * 2, '0')
 
 const poseidonHash = (items) => BigNumber.from(poseidon(items))
