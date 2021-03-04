@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 require('dotenv').config()
 const ethers = require('ethers')
 const tornadoTreesAbi = require('./abi/tornadoTrees.json')
@@ -183,8 +184,8 @@ async function getCommittedWithdrawals() {
   fs.writeFileSync('./cache/committedWithdrawals.json', JSON.stringify(events, null, 2))
 }
 
-//getCommittedDeposits()
-//getCommittedWithdrawals()
+// getCommittedDeposits()
+// getCommittedWithdrawals()
 
 // getPendingDeposits()
 // getPendingWithdrawals()
