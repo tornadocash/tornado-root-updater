@@ -2,6 +2,7 @@ const { getTornadoTrees, getProvider } = require('./singletons')
 const { action } = require('./utils')
 const ethers = require('ethers')
 const abi = new ethers.utils.AbiCoder()
+const fs = require('fs')
 
 async function getTornadoTreesEvents(type, fromBlock, toBlock) {
   const eventName = type === action.DEPOSIT ? 'DepositData' : 'WithdrawalData'
@@ -39,8 +40,13 @@ async function getMigrationEvents(type) {
   const newTreeEvents = await getTornadoTreesEvents(type, 0, 'latest')
 
   let allEvents = committedEvents.concat(pendingEvents)
-  const filter = new Set(allEvents.map(a => a.sha3))
-  allEvents = allEvents.concat(newTreeEvents.filter(a => !filter.has(a.sha3)))
+  const filter = new Set(allEvents.map((a) => a.sha3))
+  allEvents = allEvents.concat(newTreeEvents.filter((a) => !filter.has(a.sha3)))
+  // it can be useful to get all necessary events for claiming AP
+  // fs.writeFileSync(
+  //   `../bot_tornado/events_cache/${type}.json`,
+  //   JSON.stringify(allEvents, null, 2),
+  // )
   return {
     committedEvents: allEvents.slice(0, committedCount.toNumber()),
     pendingEvents: allEvents.slice(committedCount.toNumber()),
