@@ -12,7 +12,6 @@ COPY --from=tornadocash/tornado-trees \
     /app/artifacts/circuits/BatchTreeUpdate.r1cs \
     ./snarks/
 
-
 COPY package.json yarn.lock ./
 RUN yarn && yarn cache clean --force
 COPY . .

@@ -13,14 +13,19 @@ const tornadoTreesV1 = new ethers.Contract(
   provider,
 )
 
-const instances = [
+const instances = process.env.NET_ID === '1' ? [
   '0x12D66f87A04A9E220743712cE6d9bB1B5616B8Fc',
   '0x47CE0C6eD5B0Ce3d3A51fdb1C52DC66a7c3c2936',
   '0x910Cbd523D972eb0a6f4cAe4618aD62622b39DbF',
   '0xA160cdAB225685dA1d56aa342Ad8841c3b53f291',
+] : [
+  '0x3aac1cC67c2ec5Db4eA850957b967Ba153aD6279',
+  '0x723B78e67497E85279CB204544566F4dC5d2acA0',
+  '0x0E3A09dDA6B20aFbB34aC7cD4A6881493f3E7bf7',
+  '0x6Bf694a291DF3FeC1f7e69701E3ab6c592435Ae7',
 ]
 
-const tornadoTreesDeploymentBlock = 11474714
+const tornadoTreesDeploymentBlock = process.env.NET_ID === '1' ? 11474714 : 3945174
 
 async function getTornadoEvents({ instances, fromBlock, toBlock, type, provider }) {
   const hashName = type === 'deposit' ? 'commitment' : 'nullifierHash'
@@ -184,8 +189,8 @@ async function getCommittedWithdrawals() {
   fs.writeFileSync('./cache/committedWithdrawals.json', JSON.stringify(events, null, 2))
 }
 
-// getCommittedDeposits()
-// getCommittedWithdrawals()
+getCommittedDeposits()
+getCommittedWithdrawals()
 
-// getPendingDeposits()
-// getPendingWithdrawals()
+getPendingDeposits()
+getPendingWithdrawals()

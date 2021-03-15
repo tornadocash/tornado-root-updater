@@ -2,7 +2,7 @@ const { getTornadoTrees, getProvider } = require('./singletons')
 const { action } = require('./utils')
 const ethers = require('ethers')
 const abi = new ethers.utils.AbiCoder()
-const fs = require('fs')
+// const fs = require('fs')
 
 async function getTornadoTreesEvents(type, fromBlock, toBlock) {
   const eventName = type === action.DEPOSIT ? 'DepositData' : 'WithdrawalData'

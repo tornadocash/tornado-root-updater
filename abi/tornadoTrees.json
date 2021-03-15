@@ -7,18 +7,8 @@
         "type": "address"
       },
       {
-        "internalType": "address",
-        "name": "_tornadoProxy",
-        "type": "address"
-      },
-      {
         "internalType": "contract ITornadoTreesV1",
         "name": "_tornadoTreesV1",
-        "type": "address"
-      },
-      {
-        "internalType": "contract IBatchTreeUpdateVerifier",
-        "name": "_treeUpdateVerifier",
         "type": "address"
       },
       {
@@ -353,6 +343,24 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_tornadoProxy",
+        "type": "address"
+      },
+      {
+        "internalType": "contract IBatchTreeUpdateVerifier",
+        "name": "_treeUpdateVerifier",
+        "type": "address"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "lastProcessedDepositLeaf",
     "outputs": [
@@ -583,9 +591,9 @@
         "type": "bytes32"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint32",
         "name": "_pathIndices",
-        "type": "uint256"
+        "type": "uint32"
       },
       {
         "components": [
