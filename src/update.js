@@ -16,7 +16,7 @@ async function updateTree(committedEvents, pendingEvents, type) {
   const rootMethod = type === action.DEPOSIT ? 'depositRoot' : 'withdrawalRoot'
   const root = toFixedHex(await getTornadoTrees()[rootMethod]())
   if (!BigNumber.from(root).eq(tree.root())) {
-    throw new Error(`Invalid ${type} root! Contract: ${root}, local: ${tree.root()}`)
+    throw new Error(`Invalid ${type} root! Contract: ${BigNumber.from(root).toHexString()}, local: ${tree.root().toHexString()}`)
   }
   while (pendingEvents.length >= INSERT_BATCH_SIZE) {
     const chunk = pendingEvents.splice(0, INSERT_BATCH_SIZE)
