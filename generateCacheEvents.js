@@ -4,6 +4,13 @@ const ethers = require('ethers')
 const tornadoTreesAbi = require('./abi/tornadoTrees.json')
 const tornadoAbi = require('./abi/tornado.json')
 const fs = require('fs')
+const { aggregate } = require('@makerdao/multicall')
+const { BigNumber } = ethers
+
+const config = {
+  rpcUrl: process.env.RPC_URL,
+  multicallAddress: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+}
 
 const abi = new ethers.utils.AbiCoder()
 const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL)
@@ -13,17 +20,20 @@ const tornadoTreesV1 = new ethers.Contract(
   provider,
 )
 
-const instances = process.env.NET_ID === '1' ? [
-  '0x12D66f87A04A9E220743712cE6d9bB1B5616B8Fc',
-  '0x47CE0C6eD5B0Ce3d3A51fdb1C52DC66a7c3c2936',
-  '0x910Cbd523D972eb0a6f4cAe4618aD62622b39DbF',
-  '0xA160cdAB225685dA1d56aa342Ad8841c3b53f291',
-] : [
-  '0x3aac1cC67c2ec5Db4eA850957b967Ba153aD6279',
-  '0x723B78e67497E85279CB204544566F4dC5d2acA0',
-  '0x0E3A09dDA6B20aFbB34aC7cD4A6881493f3E7bf7',
-  '0x6Bf694a291DF3FeC1f7e69701E3ab6c592435Ae7',
-]
+const instances =
+  process.env.NET_ID === '1'
+    ? [
+        '0x12D66f87A04A9E220743712cE6d9bB1B5616B8Fc',
+        '0x47CE0C6eD5B0Ce3d3A51fdb1C52DC66a7c3c2936',
+        '0x910Cbd523D972eb0a6f4cAe4618aD62622b39DbF',
+        '0xA160cdAB225685dA1d56aa342Ad8841c3b53f291',
+      ]
+    : [
+        '0x3aac1cC67c2ec5Db4eA850957b967Ba153aD6279',
+        '0x723B78e67497E85279CB204544566F4dC5d2acA0',
+        '0x0E3A09dDA6B20aFbB34aC7cD4A6881493f3E7bf7',
+        '0x6Bf694a291DF3FeC1f7e69701E3ab6c592435Ae7',
+      ]
 
 const tornadoTreesDeploymentBlock = process.env.NET_ID === '1' ? 11474714 : 3945174
 
@@ -97,8 +107,40 @@ async function getPendingDeposits() {
   fs.writeFileSync('./cache/allEvents.json', JSON.stringify(tornadoEvents, null, 2))
 
   // const tornadoEvents = require('./cache/allEvents.json')
-  const registeredDeposits = await tornadoTreesV1.getRegisteredDeposits({ gasLimit: 500e6 })
   let lastProcessedDepositLeaf = (await tornadoTreesV1.lastProcessedDepositLeaf()).toNumber()
+
+  const depositsLength = BigNumber.from(await provider.getStorageAt(tornadoTreesV1.address, 0)).toNumber()
+  console.log('depositsLength', depositsLength)
+
+  let registeredDeposits = []
+  let nextBatchIndex = lastProcessedDepositLeaf
+  while (nextBatchIndex <= depositsLength) {
+    const calls = []
+    const batchSize = 300
+    const nextBatchEnd = Math.min(nextBatchIndex + batchSize, depositsLength)
+    for (let i = nextBatchIndex; i < nextBatchEnd; i++) {
+      calls.push({
+        target: tornadoTreesV1.address,
+        call: ['deposits(uint256)(bytes32)', i],
+        returns: [[`deposit-${i}`]],
+      })
+    }
+    try {
+      const { results } = await aggregate(calls, config)
+      // console.log('results', results)
+      registeredDeposits = registeredDeposits.concat(Object.values(results.original))
+      console.log('registeredDeposits', registeredDeposits.length)
+      if (nextBatchIndex === depositsLength) {
+        break
+      }
+      nextBatchIndex = nextBatchEnd
+    } catch (e) {
+      break
+    }
+  }
+
+  // fs.writeFileSync('./cache/tempRegisteredDeposits.json', JSON.stringify(registeredDeposits, null, 2))
+
   const cachedEvents = registeredDeposits.map((hash) => {
     const leaf = tornadoEvents[hash]
     if (!leaf) {
@@ -141,8 +183,38 @@ async function getPendingWithdrawals() {
 
   fs.writeFileSync('./cache/allEvents.json', JSON.stringify(tornadoEvents, null, 2))
   // const tornadoEvents = require('./cache/allEvents.json')
-  const registeredWithdrawals = await tornadoTreesV1.getRegisteredWithdrawals({ gasLimit: 500e6 })
   let lastProcessedWithdrawalLeaf = (await tornadoTreesV1.lastProcessedWithdrawalLeaf()).toNumber()
+
+  const withdrawalsLength = BigNumber.from(await provider.getStorageAt(tornadoTreesV1.address, 2)).toNumber()
+  console.log('withdrawalsLength', withdrawalsLength)
+
+  let registeredWithdrawals = []
+  let nextBatchIndex = lastProcessedWithdrawalLeaf
+  while (nextBatchIndex <= withdrawalsLength) {
+    const calls = []
+    const batchSize = 400
+    const nextBatchEnd = Math.min(nextBatchIndex + batchSize, withdrawalsLength)
+    for (let i = nextBatchIndex; i < nextBatchEnd; i++) {
+      calls.push({
+        target: tornadoTreesV1.address,
+        call: ['withdrawals(uint256)(bytes32)', i],
+        returns: [[`withdrawal-${i}`]],
+      })
+    }
+    try {
+      const { results } = await aggregate(calls, config)
+      registeredWithdrawals = registeredWithdrawals.concat(Object.values(results.original))
+      console.log('registeredWithdrawals', registeredWithdrawals.length)
+      if (nextBatchIndex === withdrawalsLength) {
+        break
+      }
+      nextBatchIndex = nextBatchEnd
+    } catch (e) {
+      console.log('e', e)
+      break
+    }
+  }
+
   const cachedEvents = registeredWithdrawals.map((hash) => {
     const leaf = tornadoEvents[hash]
     if (!leaf) {
@@ -189,8 +261,8 @@ async function getCommittedWithdrawals() {
   fs.writeFileSync('./cache/committedWithdrawals.json', JSON.stringify(events, null, 2))
 }
 
-getCommittedDeposits()
-getCommittedWithdrawals()
+// getCommittedDeposits()
+// getCommittedWithdrawals()
 
-getPendingDeposits()
+// getPendingDeposits()
 getPendingWithdrawals()

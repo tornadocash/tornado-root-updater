@@ -11,6 +11,7 @@
   "author": "Roman Semenov <semenov.roma@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "@makerdao/multicall": "^0.12.0",
     "circomlib": "git+https://github.com/tornadocash/circomlib.git#d20d53411d1bef61f38c99a8b36d5d0cc4836aa1",
     "cron": "^1.8.2",
     "dotenv": "^8.2.0",
