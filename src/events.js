@@ -1,7 +1,13 @@
 const { getTornadoTrees, redis, getProvider } = require('./singletons')
 const { action } = require('./utils')
+const { aggregate } = require('@makerdao/multicall')
 const ethers = require('ethers')
 const abi = new ethers.utils.AbiCoder()
+
+const config = {
+  rpcUrl: process.env.RPC_URL,
+  multicallAddress: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+}
 
 async function getTornadoTreesEvents(type, fromBlock, toBlock) {
   const eventName = type === action.DEPOSIT ? 'DepositData' : 'WithdrawalData'
@@ -51,12 +57,29 @@ async function getEventsWithCache(type) {
   return cachedEvents.concat(newEvents)
 }
 
-async function getEvents(type) {
-  const pendingMethod = type === action.DEPOSIT ? 'getRegisteredDeposits' : 'getRegisteredWithdrawals'
-  const pendingEventHashes = await getTornadoTrees()[pendingMethod]({ gasLimit: 500e6 })
+async function getPendingEventHashes(type, from, to) {
+  const calls = []
+  const target = (await getTornadoTrees()).address
+  const method = type === action.DEPOSIT ? 'deposits' : 'withdrawals'
+  for (let i = from; i < to; i++) {
+    calls.push({
+      target,
+      call: [`${method}(uint256)(bytes32)`, i],
+      returns: [[i]],
+    })
+  }
+  const result = await aggregate(calls, config)
+  return Object.values(result.results.original)
+}
 
+async function getEvents(type) {
   const committedMethod = type === action.DEPOSIT ? 'lastProcessedDepositLeaf' : 'lastProcessedWithdrawalLeaf'
   const committedCount = await getTornadoTrees()[committedMethod]()
+
+  const pendingLengthMethod = type === action.DEPOSIT ? 'depositsLength' : 'withdrawalsLength'
+  const pendingLength = await getTornadoTrees()[pendingLengthMethod]()
+
+  const pendingEventHashes = await getPendingEventHashes(type, committedCount, pendingLength)
 
   const events = await getEventsWithCache(type)
 
