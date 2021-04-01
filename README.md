@@ -23,6 +23,8 @@ redis-server
 
 yarn
 cp .env.example .env
+vi .env
+# download and unzip snark keys from https://tornado-trees-circuit.s3-eu-west-1.amazonaws.com/tornado-trees-circuit.tar.gz to `snarks` directory
 yarn start
 ```
 
