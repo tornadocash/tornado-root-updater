@@ -2,7 +2,7 @@ const { getTornadoTrees, getProvider } = require('./singletons')
 const { action } = require('./utils')
 const ethers = require('ethers')
 const abi = new ethers.utils.AbiCoder()
-const fs = require('fs')
+// const fs = require('fs')
 const { poseidonHash, toFixedHex } = require('./utils')
 
 async function getTornadoTreesEvents(type, fromBlock, toBlock) {
@@ -63,16 +63,8 @@ async function getMigrationEvents(type) {
     ...e,
     poseidon: toFixedHex(poseidonHash([e.instance, e.hash, e.block])),
   }))
-
-  console.log('allEvents.slice(-1)', allEvents.slice(-1))
-  const trees = await getTornadoTrees()
-  const lastHash = allEvents.slice(-1)[0].hash
-  const eventType = type === action.DEPOSIT ? 'DepositData' : 'WithdrawalData'
-  const eventFilter = trees.filters[eventType](null, lastHash)
-  const event = await trees.queryFilter(eventFilter)
-  console.log('event', event[0].blockNumber)
   // it can be useful to get all necessary events for claiming AP
-  fs.writeFileSync(`./cache/${type}.json`, JSON.stringify(allEvents, null, 2))
+  // fs.writeFileSync(`./cache/${type}.json`, JSON.stringify(allEvents, null, 2))
   return {
     committedEvents: allEvents.slice(0, committedCount.toNumber()),
     pendingEvents: allEvents.slice(committedCount.toNumber()),
