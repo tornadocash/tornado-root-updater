@@ -9,7 +9,10 @@ const { BigNumber } = ethers
 
 const config = {
   rpcUrl: process.env.RPC_URL,
-  multicallAddress: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+  multicallAddress:
+    process.env.NET_ID === '1'
+      ? '0xeefba1e63905ef1d7acba5a8513c70307c1ce441'
+      : '0x77dca2c955b15e9de4dbbcf1246b4b85b651e50e',
 }
 
 const abi = new ethers.utils.AbiCoder()
@@ -261,8 +264,8 @@ async function getCommittedWithdrawals() {
   fs.writeFileSync('./cache/committedWithdrawals.json', JSON.stringify(events, null, 2))
 }
 
-// getCommittedDeposits()
-// getCommittedWithdrawals()
+getCommittedDeposits()
+getCommittedWithdrawals()
 
-// getPendingDeposits()
+getPendingDeposits()
 getPendingWithdrawals()
