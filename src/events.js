@@ -3,10 +3,9 @@ const { action } = require('./utils')
 const { aggregate } = require('@makerdao/multicall')
 const ethers = require('ethers')
 const abi = new ethers.utils.AbiCoder()
-
 const config = {
   rpcUrl: process.env.RPC_URL,
-  multicallAddress: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+  multicallAddress: process.env.MULTICALL_ADDRESS || '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
 }
 
 async function getTornadoTreesEvents(type, fromBlock, toBlock) {
@@ -20,10 +19,7 @@ async function getTornadoTreesEvents(type, fromBlock, toBlock) {
   return events
     .map((e) => {
       const { instance, hash, block, index } = getTornadoTrees().interface.parseLog(e).args
-      const encodedData = abi.encode(
-        ['address', 'bytes32', 'uint256'],
-        [instance, hash, block],
-      )
+      const encodedData = abi.encode(['address', 'bytes32', 'uint256'], [instance, hash, block])
       return {
         instance,
         hash,
@@ -37,7 +33,7 @@ async function getTornadoTreesEvents(type, fromBlock, toBlock) {
 
 async function getEventsWithCache(type) {
   const currentBlock = await getProvider().getBlockNumber()
-  let lastBlock = Number(await redis.get(`${type}LastBlock`) || 0) + 1
+  let lastBlock = Number((await redis.get(`${type}LastBlock`)) || 0) + 1
   // if (currentBlock <= lastBlock) {
   //   throw new Error('Current block is lower than last block')
   // }
@@ -46,45 +42,55 @@ async function getEventsWithCache(type) {
     cachedEvents = require(`../cache/${type}.json`)
     if (cachedEvents.length > 0) {
       lastBlock = cachedEvents.slice(-1)[0].block + 1
-      await redis.rpush(type, cachedEvents.map((e) => JSON.stringify(e)))
+      await redis.rpush(
+        type,
+        cachedEvents.map((e) => JSON.stringify(e)),
+      )
     }
   }
   const newEvents = await getTornadoTreesEvents(type, lastBlock, currentBlock)
   if (newEvents.length > 0) {
-    await redis.rpush(type, newEvents.map((e) => JSON.stringify(e)))
+    await redis.rpush(
+      type,
+      newEvents.map((e) => JSON.stringify(e)),
+    )
   }
   await redis.set(`${type}LastBlock`, currentBlock)
   return cachedEvents.concat(newEvents)
 }
 
 async function getPendingEventHashes(type, from, to) {
-  const calls = []
-  const target = (await getTornadoTrees()).address
-  const method = type === action.DEPOSIT ? 'deposits' : 'withdrawals'
-  for (let i = from; i < to; i++) {
-    calls.push({
-      target,
-      call: [`${method}(uint256)(bytes32)`, i],
-      returns: [[i]],
-    })
+  try {
+    const calls = []
+    const target = (await getTornadoTrees()).address
+    const method = type === action.DEPOSIT ? 'deposits' : 'withdrawals'
+    for (let i = from; i < to; i++) {
+      calls.push({
+        target,
+        call: [`${method}(uint256)(bytes32)`, i],
+        returns: [[i]],
+      })
+    }
+    const result = await aggregate(calls, config)
+    return Object.values(result.results.original)
+  } catch (e) {
+    console.error('getPendingEventHashes', e)
   }
-  const result = await aggregate(calls, config)
-  return Object.values(result.results.original)
 }
 
 async function getEvents(type) {
   const committedMethod = type === action.DEPOSIT ? 'lastProcessedDepositLeaf' : 'lastProcessedWithdrawalLeaf'
-  const committedCount = await getTornadoTrees()[committedMethod]()
+  const committedCount = (await getTornadoTrees()[committedMethod]()).toNumber()
 
   const pendingLengthMethod = type === action.DEPOSIT ? 'depositsLength' : 'withdrawalsLength'
-  const pendingLength = await getTornadoTrees()[pendingLengthMethod]()
+  const pendingLength = (await getTornadoTrees()[pendingLengthMethod]()).toNumber()
 
   const pendingEventHashes = await getPendingEventHashes(type, committedCount, pendingLength)
 
   const events = await getEventsWithCache(type)
 
   const committedEvents = events.slice(0, committedCount)
-  const pendingEvents = pendingEventHashes.map((e) => events.find(a => a.sha3 === e))
+  const pendingEvents = pendingEventHashes.map((e) => events.find((a) => a.sha3 === e))
 
   if (pendingEvents.some((e) => e === undefined)) {
     pendingEvents.forEach((e, i) => {
