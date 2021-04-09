@@ -75,6 +75,7 @@ async function getPendingEventHashes(type, from, to) {
     return Object.values(result.results.original)
   } catch (e) {
     console.error('getPendingEventHashes', e)
+    process.exit(1)
   }
 }
 
