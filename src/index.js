@@ -1,8 +1,10 @@
 require('dotenv').config()
+
 const cron = require('cron')
+
+const { action } = require('./utils')
 const { getEvents } = require('./events')
 const { updateTree } = require('./update')
-const { action } = require('./utils')
 
 async function main() {
   // todo retry

@@ -1,33 +1,36 @@
 require('dotenv').config()
+
 const ethers = require('ethers')
-const { TxManager } = require('tx-manager')
-const tornadoTreesAbi = require('../abi/tornadoTrees.json')
 const Redis = require('ioredis')
-const redis = new Redis(process.env.REDIS_URL)
 const config = require('torn-token')
+const { TxManager } = require('tx-manager')
+
+const tornadoTreesAbi = require('../abi/tornadoTrees.json')
+
+const { privateKey, rpcUrl, redisUrl, maxGasPrice, confirmations, broadcastNodes, treesContract } = require('./config')
+
+const redis = new Redis(redisUrl)
+
 let tornadoTrees
 let provider
 
-const txManager = new TxManager({
-  privateKey: process.env.PRIVATE_KEY,
-  rpcUrl: process.env.RPC_URL,
-  broadcastNodes: process.env.BROADCAST_NODES ? process.env.BROADCAST_NODES.split(',') : undefined,
+const txManager = new TxManager({ rpcUrl, privateKey, broadcastNodes,
   config: {
-    CONFIRMATIONS: process.env.CONFIRMATION_BLOCKS,
-    MAX_GAS_PRICE: process.env.GAS_PRICE,
+    CONFIRMATIONS: confirmations,
+    MAX_GAS_PRICE: maxGasPrice,
   },
 })
 
 function getProvider() {
   if (!provider) {
-    provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL)
+    provider = new ethers.providers.JsonRpcProvider(rpcUrl)
   }
   return provider
 }
 
 function getTornadoTrees() {
   if (!tornadoTrees) {
-    tornadoTrees = new ethers.Contract(process.env.TORNADO_TREES || config.tornadoTrees.address, tornadoTreesAbi, getProvider())
+    tornadoTrees = new ethers.Contract(treesContract || config.tornadoTrees.address, tornadoTreesAbi, getProvider())
   }
   return tornadoTrees
 }

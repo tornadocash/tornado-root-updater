@@ -1,12 +1,11 @@
-const { getTornadoTrees, redis, getProvider } = require('./singletons')
-const { action } = require('./utils')
-const { aggregate } = require('@makerdao/multicall')
 const ethers = require('ethers')
+const { aggregate } = require('@makerdao/multicall')
+
+const { action } = require('./utils')
+const { multicallAddress, rpcUrl } = require('./config')
+const { getTornadoTrees, redis, getProvider } = require('./singletons')
+
 const abi = new ethers.utils.AbiCoder()
-const config = {
-  rpcUrl: process.env.RPC_URL,
-  multicallAddress: process.env.MULTICALL_ADDRESS || '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
-}
 
 async function getTornadoTreesEvents(type, fromBlock, toBlock) {
   const eventName = type === action.DEPOSIT ? 'DepositData' : 'WithdrawalData'
@@ -71,7 +70,7 @@ async function getPendingEventHashes(type, from, to) {
         returns: [[i]],
       })
     }
-    const result = await aggregate(calls, config)
+    const result = await aggregate(calls, { multicallAddress, rpcUrl })
     return Object.values(result.results.original)
   } catch (e) {
     console.error('getPendingEventHashes', e)
