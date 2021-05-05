@@ -1,11 +1,7 @@
-const cron = require('cron')
-
 const { action } = require('./utils')
 const { getEvents } = require('./events')
 const { updateTree } = require('./update')
 const { redis, getProviderWs } = require('./singletons')
-
-const { cronExpression } = require('./config')
 
 let provider = getProviderWs()
 
@@ -46,8 +42,6 @@ async function init() {
     console.error('error on init treeWatcher', e.message)
   }
 }
-
-cron.job(cronExpression, init, null, true, null, null, true)
 
 process.on('unhandledRejection', error => {
   console.error('Unhandled promise rejection', error)

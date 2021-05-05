@@ -7,7 +7,7 @@
     "server": "node src/server.js",
     "treeWatcher": "node src/treeWatcher",
     "lint": "eslint --ext .js --ignore-path .gitignore .",
-    "start": "yarn server & yarn treeWatcher"
+    "start": "yarn server"
   },
   "keywords": [],
   "author": "Roman Semenov <semenov.roma@gmail.com>",

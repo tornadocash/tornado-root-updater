@@ -24,6 +24,7 @@ app.use((err, req, res, next) => {
   next()
 })
 
+app.get('/test', controller.test)
 app.get('/deposit', controller.getDepositsCallData)
 app.get('/withdrawal', controller.getWithdrawalsCallData)
 

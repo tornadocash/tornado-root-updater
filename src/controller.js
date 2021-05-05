@@ -14,7 +14,15 @@ async function getDepositsCallData(req, res) {
   return res.json({ callData })
 }
 
+function test(req, res) {
+  const callData = 'test 123'
+  console.log('deposit:callData', callData)
+
+  return res.json({ callData })
+}
+
 module.exports = {
+  test,
   getWithdrawalsCallData,
   getDepositsCallData,
 }
