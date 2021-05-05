@@ -24,8 +24,8 @@ app.use((err, req, res, next) => {
   next()
 })
 
-app.post('/deposit', controller.getDepositsCallData)
-app.post('/withdrawal', controller.getWithdrawalsCallData)
+app.get('/deposit', controller.getDepositsCallData)
+app.get('/withdrawal', controller.getWithdrawalsCallData)
 
 app.listen(port)
 console.log(`Relayer ${version} started on port ${port}`)
