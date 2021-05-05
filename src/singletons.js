@@ -7,12 +7,13 @@ const { TxManager } = require('tx-manager')
 
 const tornadoTreesAbi = require('../abi/tornadoTrees.json')
 
-const { privateKey, rpcUrl, redisUrl, maxGasPrice, confirmations, broadcastNodes, treesContract } = require('./config')
+const { privateKey, rpcUrl, redisUrl, maxGasPrice, confirmations, broadcastNodes, wsRpcUrl, treesContract } = require('./config')
 
 const redis = new Redis(redisUrl)
 
 let tornadoTrees
 let provider
+let providerWs
 
 const txManager = new TxManager({ rpcUrl, privateKey, broadcastNodes,
   config: {
@@ -35,8 +36,24 @@ function getTornadoTrees() {
   return tornadoTrees
 }
 
+function getProviderWs() {
+  if (!providerWs) {
+    providerWs = new ethers.providers.WebSocketProvider(wsRpcUrl)
+  }
+  return providerWs
+}
+
+function getTreesWithSocket() {
+  if (!tornadoTrees) {
+    tornadoTrees = new ethers.Contract(treesContract || config.tornadoTrees.address, tornadoTreesAbi, getProviderWs())
+  }
+  return tornadoTrees
+}
+
 module.exports = {
   redis,
+  getTreesWithSocket,
+  getProviderWs,
   getTornadoTrees,
   getProvider,
   txManager,

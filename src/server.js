@@ -5,7 +5,6 @@ const { version } = require('../package.json')
 const { port } = require('./config')
 const controller = require('./controller')
 
-
 const app = express()
 app.use(express.json())
 
@@ -25,8 +24,8 @@ app.use((err, req, res, next) => {
   next()
 })
 
-app.post('/deposit', controller.miningReward)
-app.post('/withdrawal', controller.miningWithdraw)
+app.post('/deposit', controller.getDepositsCallData)
+app.post('/withdrawal', controller.getWithdrawalsCallData)
 
 app.listen(port)
 console.log(`Relayer ${version} started on port ${port}`)

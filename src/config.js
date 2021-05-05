@@ -14,4 +14,5 @@ module.exports = {
   port: process.env.APP_PORT || 8000,
   insertBatchSize: process.env.INSERT_BATCH_SIZE,
   gasPrice: process.env.GAS_PRICE,
+  cronExpression: process.env.CRON_EXPRESSION,
 }
