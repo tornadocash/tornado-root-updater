@@ -16,5 +16,24 @@ services:
     volumes:
       - redis:/data
 
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - conf:/etc/nginx/conf.d
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - certs:/etc/nginx/certs
+    logging:
+      driver: none
+
 volumes:
+  conf:
+  vhost:
+  html:
+  certs:
   redis:

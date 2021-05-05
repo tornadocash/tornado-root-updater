@@ -16,4 +16,5 @@ COPY package.json yarn.lock ./
 RUN yarn && yarn cache clean --force
 COPY . .
 
-CMD ["yarn", "start"]
+EXPOSE 8000
+ENTRYPOINT ["yarn"]
