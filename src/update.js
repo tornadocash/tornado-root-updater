@@ -16,14 +16,14 @@ async function updateTree(committedEvents, pendingEvents, type) {
   if (!BigNumber.from(root).eq(tree.root())) {
     throw new Error(`Invalid ${type} root! Contract: ${BigNumber.from(root).toHexString()}, local: ${tree.root().toHexString()}`)
   }
-  while (pendingEvents.length >= insertBatchSize) {
+  if (pendingEvents.length >= insertBatchSize) {
     const chunk = pendingEvents.splice(0, insertBatchSize)
 
     console.log('Generating snark proof')
     const { input, args } = tornadoTrees.batchTreeUpdate(tree, chunk)
     const proof = await tornadoTrees.prove(input, './snarks/BatchTreeUpdate')
 
-    console.log('Sending update tx')
+    console.log('Sending update tx', type)
     const method = type === action.DEPOSIT ? 'updateDepositTree' : 'updateWithdrawalTree'
     const txData = await getTornadoTrees().populateTransaction[method](proof, ...args, { gasPrice: utils.parseUnits(gasPrice, 'gwei') })
 

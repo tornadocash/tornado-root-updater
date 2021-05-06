@@ -5,25 +5,40 @@ const { redis, getProviderWs } = require('./singletons')
 
 let provider = getProviderWs()
 
+let isActive = false
+
 async function processNewBlock(block) {
   console.log('processNewEvent', block)
 
   if (block) {
     // TODO check event length
     // what if updateRedis takes more than 15 sec?
-    await updateRedis()
+
+    console.log('isActive', isActive)
+
+    if (!isActive) {
+      await updateRedis()
+    }
   }
 }
 
 async function updateRedis() {
-  for (const type of Object.values(action)) {
-    const { committedEvents, pendingEvents } = await getEvents(type)
-    console.log(`There are ${pendingEvents.length} unprocessed ${type}s`)
+  isActive = true
 
-    const txData  = await updateTree(committedEvents, pendingEvents, type)
-    console.log('txData', txData)
+  try {
+    for (const type of Object.values(action)) {
+      const { committedEvents, pendingEvents } = await getEvents(type)
+      console.log(`There are ${pendingEvents.length} unprocessed ${type}s`)
 
-    await redis.set(`${type}:data`, txData)
+      const txData  = await updateTree(committedEvents, pendingEvents, type)
+      console.log('updateRedis:data', type, JSON.stringify(txData.data))
+
+      await redis.set(`${type}:data`, JSON.stringify(txData.data))
+    }
+    isActive = false
+  } catch (err) {
+    console.log('err', err.message)
+    isActive = false
   }
 }
 
@@ -42,6 +57,8 @@ async function init() {
     console.error('error on init treeWatcher', e.message)
   }
 }
+
+init()
 
 process.on('unhandledRejection', error => {
   console.error('Unhandled promise rejection', error)
