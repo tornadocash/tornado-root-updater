@@ -33,7 +33,7 @@ async function updateRedis() {
       const txData  = await updateTree(committedEvents, pendingEvents, type)
       console.log('updateRedis:data', type, JSON.stringify(txData.data))
 
-      await redis.set(`${type}:data`, JSON.stringify(txData.data))
+      await redis.set(`${type}:data`, txData)
     }
     isActive = false
   } catch (err) {

@@ -1,10 +1,10 @@
 require('dotenv').config()
 
-const { utils, BigNumber } = require('ethers')
+const { BigNumber } = require('ethers')
 const tornadoTrees = require('tornado-trees')
 const MerkleTree = require('fixed-merkle-tree')
 
-const { insertBatchSize, gasPrice } = require('./config')
+const { insertBatchSize } = require('./config')
 const { getTornadoTrees } = require('./singletons')
 const { action, poseidonHash, poseidonHash2, toFixedHex } = require('./utils')
 
@@ -25,9 +25,10 @@ async function updateTree(committedEvents, pendingEvents, type) {
 
     console.log('Sending update tx', type)
     const method = type === action.DEPOSIT ? 'updateDepositTree' : 'updateWithdrawalTree'
-    const txData = await getTornadoTrees().populateTransaction[method](proof, ...args, { gasPrice: utils.parseUnits(gasPrice, 'gwei') })
 
-    console.log('txData', txData)
+    const [argsHash, oldRoot, newRoot, pathIndices, events] = args
+
+    const txData = getTornadoTrees().interface.encodeFunctionData(`${method}`, [proof, argsHash, oldRoot, newRoot, pathIndices, events])
 
     return txData
   }
