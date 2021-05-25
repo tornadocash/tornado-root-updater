@@ -13,9 +13,6 @@ async function processNewBlock(block) {
   if (block) {
     // TODO check event length
     // what if updateRedis takes more than 15 sec?
-
-    console.log('isActive', isActive)
-
     if (!isActive) {
       await updateRedis()
     }
@@ -25,21 +22,20 @@ async function processNewBlock(block) {
 async function updateRedis() {
   isActive = true
 
-  try {
-    for (const type of Object.values(action)) {
+  for (const type of Object.values(action)) {
+    try {
       const { committedEvents, pendingEvents } = await getEvents(type)
       console.log(`There are ${pendingEvents.length} unprocessed ${type}s`)
 
       const txData  = await updateTree(committedEvents, pendingEvents, type)
-      console.log('updateRedis:data', type, JSON.stringify(txData.data))
+      console.log('updateRedis:data', type, txData)
 
       await redis.set(`${type}:data`, txData)
+    } catch {
+      continue
     }
-    isActive = false
-  } catch (err) {
-    console.log('err', err.message)
-    isActive = false
   }
+  isActive = false
 }
 
 async function rebuild() {
