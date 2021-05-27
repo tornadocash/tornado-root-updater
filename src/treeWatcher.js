@@ -24,13 +24,25 @@ async function updateRedis() {
 
   for (const type of Object.values(action)) {
     try {
+      const countEventCache = await redis.get(`${type}pendingEvent`)
+
       const { committedEvents, pendingEvents } = await getEvents(type)
       console.log(`There are ${pendingEvents.length} unprocessed ${type}s`)
+
+      const countEvent = String(pendingEvents.length)
+
+      if (pendingEvents && countEventCache === countEvent) {
+        continue
+      }
 
       const txData  = await updateTree(committedEvents, pendingEvents, type)
       console.log('updateRedis:data', type, txData)
 
-      await redis.set(`${type}:data`, txData)
+      if (txData) {
+        console.log('set countEvent', type, countEvent)
+        await redis.hset(`${type}pendingEvent`, countEvent)
+        await redis.hset(`${type}:data`, txData)
+      }
     } catch {
       continue
     }

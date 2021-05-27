@@ -13,25 +13,29 @@ async function updateTree(committedEvents, pendingEvents, type) {
   const tree = new MerkleTree(20, leaves, { hashFunction: poseidonHash2 })
   const rootMethod = type === action.DEPOSIT ? 'depositRoot' : 'withdrawalRoot'
   const root = toFixedHex(await getTornadoTrees()[rootMethod]())
+
   if (!BigNumber.from(root).eq(tree.root())) {
     throw new Error(`Invalid ${type} root! Contract: ${BigNumber.from(root).toHexString()}, local: ${tree.root().toHexString()}`)
   }
-  if (pendingEvents.length >= insertBatchSize) {
-    const chunk = pendingEvents.splice(0, insertBatchSize)
 
-    console.log('Generating snark proof')
-    const { input, args } = tornadoTrees.batchTreeUpdate(tree, chunk)
-    const proof = await tornadoTrees.prove(input, './snarks/BatchTreeUpdate')
+  try {
+    if (pendingEvents.length >= insertBatchSize) {
+      const chunk = pendingEvents.splice(0, insertBatchSize)
 
-    console.log('Sending update tx', type)
-    const method = type === action.DEPOSIT ? 'updateDepositTree' : 'updateWithdrawalTree'
+      console.log('Generating snark proof')
+      const { input, args } = tornadoTrees.batchTreeUpdate(tree, chunk)
+      const proof = await tornadoTrees.prove(input, './snarks/BatchTreeUpdate')
 
-    const [argsHash, oldRoot, newRoot, pathIndices, events] = args
+      const method = type === action.DEPOSIT ? 'updateDepositTree' : 'updateWithdrawalTree'
 
-    const txData = getTornadoTrees().interface.encodeFunctionData(`${method}`, [proof, argsHash, oldRoot, newRoot, pathIndices, events])
-    console.log('updateTree:txData')
+      const [argsHash, oldRoot, newRoot, pathIndices, events] = args
 
-    return txData
+      const txData = getTornadoTrees().interface.encodeFunctionData(`${method}`, [proof, argsHash, oldRoot, newRoot, pathIndices, events])
+
+      return txData
+    }
+  } catch (err) {
+    console.log('err', err.message)
   }
 }
 

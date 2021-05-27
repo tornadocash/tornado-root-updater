@@ -91,7 +91,7 @@ async function getEvents(type) {
   const committedEvents = events.slice(0, committedCount)
 
   const cachedPendingEvents = events.slice(committedCount)
-  const pendingEvents = [].concat(cachedPendingEvents, pendingEventHashes).map((e) => events.find((a) => a.sha3 === e)).filter((e) => e === undefined)
+  const pendingEvents = [].concat(cachedPendingEvents.map(e => e.sha3), pendingEventHashes).map((e) => events.find((a) => a.sha3 === e))
 
   return {
     committedEvents,
