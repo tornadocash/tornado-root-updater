@@ -33,10 +33,9 @@ async function getTornadoTreesEvents(type, fromBlock, toBlock) {
 async function getEventsWithCache(type) {
   const currentBlock = await getProvider().getBlockNumber()
   let lastBlock = Number((await redis.get(`${type}LastBlock`)) || 0) + 1
-  // if (currentBlock <= lastBlock) {
-  //   throw new Error('Current block is lower than last block')
-  // }
+
   let cachedEvents = (await redis.lrange(type, 0, -1)).map((e) => JSON.parse(e))
+
   if (cachedEvents.length === 0) {
     cachedEvents = require(`../cache/${type}.json`)
     if (cachedEvents.length > 0) {
@@ -90,16 +89,9 @@ async function getEvents(type) {
   const events = await getEventsWithCache(type)
 
   const committedEvents = events.slice(0, committedCount)
-  const pendingEvents = pendingEventHashes.map((e) => events.find((a) => a.sha3 === e))
 
-  if (pendingEvents.some((e) => e === undefined)) {
-    pendingEvents.forEach((e, i) => {
-      if (e === undefined) {
-        console.log('Unknown event', pendingEventHashes[i])
-      }
-    })
-    throw new Error('Tree contract expects unknown tornado event')
-  }
+  const cachedPendingEvents = events.slice(committedCount)
+  const pendingEvents = [].concat(cachedPendingEvents, pendingEventHashes).map((e) => events.find((a) => a.sha3 === e)).filter((e) => e === undefined)
 
   return {
     committedEvents,

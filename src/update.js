@@ -29,6 +29,7 @@ async function updateTree(committedEvents, pendingEvents, type) {
     const [argsHash, oldRoot, newRoot, pathIndices, events] = args
 
     const txData = getTornadoTrees().interface.encodeFunctionData(`${method}`, [proof, argsHash, oldRoot, newRoot, pathIndices, events])
+    console.log('updateTree:txData')
 
     return txData
   }
