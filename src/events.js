@@ -1,6 +1,5 @@
 const ethers = require('ethers')
 const { aggregate } = require('@makerdao/multicall')
-const { Utils } = require('tornado-anonymity-mining')
 
 const { action } = require('./utils')
 const { multicallAddress, rpcUrl, netId } = require('./config')
@@ -26,7 +25,6 @@ async function getTornadoTreesEvents(type, fromBlock, toBlock) {
         block: block.toNumber(),
         index: index.toNumber(),
         sha3: ethers.utils.keccak256(encodedData),
-        poseidon: Utils.toFixedHex(Utils.poseidonHash([instance, hash, block]))
       }
     })
     .sort((a, b) => a.index - b.index)
@@ -47,8 +45,8 @@ async function getEventsWithCache(type) {
         hash,
         poseidon,
         instance,
-        block: block.toNumber(),
-        index: index.toNumber(),
+        block: Number(block),
+        index: Number(index),
         sha3: ethers.utils.keccak256(encodedData),
       }
     })

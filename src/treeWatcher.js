@@ -40,7 +40,8 @@ async function updateRedis() {
 
       await redis.hmset(`${type}:pendingEvent`, { countEvent })
       await redis.hmset(`${type}:data`, { callData: txData })
-    } catch {
+    } catch (err) {
+      console.log('err', err.message)
       continue
     }
   }
