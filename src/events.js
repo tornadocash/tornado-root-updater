@@ -1,8 +1,9 @@
 const ethers = require('ethers')
 const { aggregate } = require('@makerdao/multicall')
+const { Utils } = require('tornado-anonymity-mining')
 
 const { action } = require('./utils')
-const { multicallAddress, rpcUrl } = require('./config')
+const { multicallAddress, rpcUrl, netId } = require('./config')
 const { getTornadoTrees, redis, getProvider } = require('./singletons')
 
 const abi = new ethers.utils.AbiCoder()
@@ -25,6 +26,7 @@ async function getTornadoTreesEvents(type, fromBlock, toBlock) {
         block: block.toNumber(),
         index: index.toNumber(),
         sha3: ethers.utils.keccak256(encodedData),
+        poseidon: Utils.toFixedHex(Utils.poseidonHash([instance, hash, block]))
       }
     })
     .sort((a, b) => a.index - b.index)
@@ -37,7 +39,20 @@ async function getEventsWithCache(type) {
   let cachedEvents = (await redis.lrange(type, 0, -1)).map((e) => JSON.parse(e))
 
   if (cachedEvents.length === 0) {
-    cachedEvents = require(`../cache/${type}.json`)
+    cachedEvents = require(`../cache/${type}_${netId}.json`)
+
+    cachedEvents = cachedEvents.map(({ instance, poseidon, hash, block, index }) => {
+      const encodedData = abi.encode(['address', 'bytes32', 'uint256'], [instance, hash, block])
+      return {
+        hash,
+        poseidon,
+        instance,
+        block: block.toNumber(),
+        index: index.toNumber(),
+        sha3: ethers.utils.keccak256(encodedData),
+      }
+    })
+
     if (cachedEvents.length > 0) {
       lastBlock = cachedEvents.slice(-1)[0].block + 1
       await redis.rpush(
