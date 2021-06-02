@@ -35,8 +35,14 @@ async function updateRedis() {
         continue
       }
 
+      await redis.hset(`${type}:data`, { isGenerated: false })
+
       const txData  = await updateTree(committedEvents, pendingEvents, type)
       console.log('updateRedis:data', type, txData)
+
+      if (txData) {
+        await redis.hset(`${type}:data`, { isGenerated: true })
+      }
 
       await redis.hmset(`${type}:pendingEvent`, { countEvent })
       await redis.hmset(`${type}:data`, { callData: txData })
