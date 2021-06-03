@@ -24,34 +24,47 @@ async function updateRedis() {
 
   for (const type of Object.values(action)) {
     try {
-      const { countEvent: countEventCache } = await redis.hgetall(`${type}:pendingEvent`)
+      const { countEvent: countEventCache } = await redis.hgetall(`${type}:committed`)
 
       const { committedEvents, pendingEvents } = await getEvents(type)
       console.log(`There are ${pendingEvents.length} unprocessed ${type}s`)
 
-      const countEvent = String(pendingEvents.length)
+      const countEvent = String(committedEvents.length)
 
-      if (countEventCache === countEvent) {
+      if (Number(countEvent) <= Number(countEventCache)) {
         continue
       }
 
       await redis.hset(`${type}:data`, { isGenerated: false })
 
       const txData  = await updateTree(committedEvents, pendingEvents, type)
-      console.log('updateRedis:data', type, txData)
+      console.log('updateRedis:data', type)
 
       if (txData) {
+        console.log('updateRedis:data save')
         await redis.hset(`${type}:data`, { isGenerated: true })
+        await redis.hmset(`${type}:committed`, { countEvent })
+        await redis.hmset(`${type}:data`, { callData: txData })
       }
-
-      await redis.hmset(`${type}:pendingEvent`, { countEvent })
-      await redis.hmset(`${type}:data`, { callData: txData })
     } catch (err) {
-      console.log('err', err.message)
+      if (err.message.includes(type)) {
+        await clearRedisData(type)
+      }
+      console.log('updateRedis err', err.message)
       continue
     }
   }
   isActive = false
+}
+
+async function clearRedisData(type) {
+  try {
+    await redis.del(`${type}:committed`)
+    await redis.del(`${type}:data`)
+    await redis.del(type)
+  } catch (err) {
+    console.log('clearRedisData err', err.message)
+  }
 }
 
 async function rebuild() {
