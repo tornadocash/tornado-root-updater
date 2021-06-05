@@ -3,7 +3,7 @@ const { aggregate } = require('@makerdao/multicall')
 
 const { action } = require('./utils')
 const { multicallAddress, rpcUrl, netId } = require('./config')
-const { getTornadoTrees, redis, getProvider } = require('./singletons')
+const { getTornadoTrees, getProvider } = require('./singletons')
 
 const abi = new ethers.utils.AbiCoder()
 
