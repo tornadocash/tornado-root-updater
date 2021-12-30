@@ -31,5 +31,5 @@ vi .env
 yarn update:cache
 
 docker build . -t tornadocash/tornado-root-updater:server
-dokcer compose up -d
+docker compose up -d
 ```
