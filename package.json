@@ -6,6 +6,7 @@
   "scripts": {
     "server": "node src/server.js",
     "treeWatcher": "node src/treeWatcher",
+    "update:cache": "node --experimental-json-modules updateEvents.js",
     "lint": "eslint --ext .js --ignore-path .gitignore .",
     "start": "yarn server & yarn treeWatcher"
   },
@@ -25,7 +26,8 @@
     "torn-token": "^1.0.0",
     "tornado-anonymity-mining": "^2.1.4",
     "tornado-trees": "^0.0.5",
-    "tx-manager": "^0.2.9"
+    "tx-manager": "^0.2.9",
+    "web3": "^1.6.1"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",

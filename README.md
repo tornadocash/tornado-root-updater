@@ -6,15 +6,6 @@ This software helps to upload deposit and withdrawal metadata from Tornado Cash 
 
 Keep in mind, it could cost some ether to do so.
 
-## Usage with docker
-
-```shell script
-wget https://raw.githubusercontent.com/tornadocash/tornado-root-updater/master/docker-compose.yml
-wget https://raw.githubusercontent.com/tornadocash/tornado-root-updater/master/.env.example -O .env
-vi .env # update env vars
-docker-compose up -d
-```
-
 ## Usage for development
 
 ```shell script
@@ -29,3 +20,16 @@ yarn start
 ```
 
 Caches events from both mining and tornado cash instances
+
+## Update cached events
+
+```shell script
+yarn
+cp .env.example .env
+vi .env
+
+yarn update:cache
+
+docker build . -t tornadocash/tornado-root-updater:server
+dokcer compose up -d
+```
